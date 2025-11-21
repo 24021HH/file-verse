@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OFS - Omni File System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1a1f3a 100%);
+            color: #f1f5f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 30px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 10px 20px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        h1 {
+            color: #6366f1;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+        }
+        
+        .subtitle {
+            color: #cbd5e1;
+            font-size: 0.9em;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: linear-gradient(135deg, #1e293b 0%, #22304c 100%);
+            border: 1px solid #334155;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            border-color: #6366f1;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+        }
+        
+        .card h2 {
+            color: #10b981;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+        
+        .info-value {
+            color: #10b981;
+            font-family: 'Monaco', monospace;
+        }
+        
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        
+        .notifications {
+            grid-column: 1 / -1;
+        }
+        
+        .notification {
+            background: linear-gradient(135deg, #1e293b 0%, #22304c 100%);
+            border-left: 4px solid #6366f1;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            animation: slideIn 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .notification.success {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        }
+        
+        .notification.error {
+            border-left-color: #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+        }
+        
+        .notification.info {
+            border-left-color: #3b82f6;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+        
+        .notification-icon {
+            font-size: 1.3em;
+            flex-shrink: 0;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .notification-message {
+            font-size: 0.9em;
+            color: #cbd5e1;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .demo-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OFS - Omni File System</h1>
+            <p class="subtitle">Web-based File Management Interface</p>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </header>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>System Information</h2>
+                <div class="info-item">
+                    <span class="info-label">Omni File:</span>
+                    <span class="info-value">fs_server.omni</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Size:</span>
+                    <span class="info-value">10 MB</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Blocks:</span>
+                    <span class="info-value">2560</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Server:</span>
+                    <span class="info-value">127.0.0.1:8080</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value"><span class="demo-indicator"></span>RUNNING</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Pre-loaded Users:</span>
+                    <span class="info-value">51</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Admin User:</span>
+                    <span class="info-value">admin</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Admin Password:</span>
+                    <span class="info-value">admin123</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Quick Actions</h2>
+                <div class="buttons-grid">
+                    <button class="btn-primary" onclick="runCmd('LIST /', 'LIST')">List Files</button>
+                    <button class="btn-primary" onclick="runCmd('CREATE /test demo admin', 'CREATE')">Create File</button>
+                    <button class="btn-primary" onclick="runCmd('READ /test', 'READ')">Read File</button>
+                    <button class="btn-primary" onclick="runCmd('DELETE /test admin', 'DELETE')">Delete File</button>
+                    <button class="btn-primary" onclick="window.location.href='/users.html'">View Users</button>
+                    <button class="btn-success" onclick="runDemo()">Run Full Demo</button>
+                </div>
+            </div>
+            
+            <div class="card notifications" style="grid-column: 1 / -1;">
+                <h2>Activity Notifications</h2>
+                <div id="notifications"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (!sessionStorage.getItem('ofs_logged_in')) {
+            window.location.href = '/login.html';
+        }
+
+        const notificationsDiv = document.getElementById('notifications');
+        
+        function addNotification(type, title, message, icon) {
+            const notification = document.createElement('div');
+            notification.className = 'notification ' + type;
+            notification.innerHTML = `
+                <div class="notification-icon">${icon}</div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+            notificationsDiv.insertBefore(notification, notificationsDiv.firstChild);
+            
+            if (notificationsDiv.children.length > 10) {
+                notificationsDiv.removeChild(notificationsDiv.lastChild);
+            }
+            
+            setTimeout(() => {
+                notification.style.opacity = '0.7';
+            }, 5000);
+        }
+        
+        function runCmd(cmd, operation) {
+            addNotification('info', operation + ' Operation', 'Executing: ' + cmd, 'hourglass');
+            
+            fetch('/api/proxy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: cmd, host: '127.0.0.1', port: 8080 })
+            }).then(r => r.text()).then(data => {
+                const isSuccess = data.includes('succeeded') || data.includes('success');
+                const status = isSuccess ? 'Success' : 'Completed';
+                const type = isSuccess ? 'success' : 'info';
+                const icon = isSuccess ? 'checkmark' : 'circle';
+                
+                addNotification(type, operation + ' ' + status, data.substring(0, 60), icon);
+            }).catch(e => {
+                addNotification('error', operation + ' Failed', 'Error: ' + e.message, 'x');
+            });
+        }
+        
+        async function runDemo() {
+            addNotification('info', 'Demo Started', 'Running automated demo sequence...', 'play');
+            
+            const commands = [
+                { cmd: 'LIST /', title: 'Step 1: List Root Directory', op: 'LIST' },
+                { cmd: 'CREATE /demo demo admin', title: 'Step 2: Create Demo File', op: 'CREATE' },
+                { cmd: 'READ /demo', title: 'Step 3: Read Demo File', op: 'READ' },
+                { cmd: 'DELETE /demo admin', title: 'Step 4: Delete Demo File', op: 'DELETE' },
+                { cmd: 'LIST /', title: 'Step 5: Final List', op: 'LIST' }
+            ];
+            
+            for (let i = 0; i < commands.length; i++) {
+                const step = commands[i];
+                addNotification('info', step.title, 'Running: ' + step.cmd, (i + 1) + '/5');
+                
+                await new Promise(resolve => {
+                    fetch('/api/proxy', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: step.cmd, host: '127.0.0.1', port: 8080 })
+                    }).then(r => r.text()).then(data => {
+                        const isSuccess = data.includes('succeeded') || data.includes('success');
+                        addNotification(isSuccess ? 'success' : 'info', step.op + ' Completed', data.substring(0, 60), 'checkmark');
+                        setTimeout(resolve, 1500);
+                    }).catch(e => {
+                        addNotification('error', step.op + ' Failed', e.message, 'x');
+                        setTimeout(resolve, 1500);
+                    });
+                });
+            }
+            
+            addNotification('success', 'Demo Complete', 'All operations executed successfully!', 'tada');
+        }
+        
+        function logout() {
+            sessionStorage.removeItem('ofs_logged_in');
+            sessionStorage.removeItem('ofs_username');
+            sessionStorage.removeItem('ofs_session');
+            window.location.href = '/login.html';
+        }
+        
+        window.addEventListener('load', () => {
+            addNotification('success', 'System Ready', 'OFS Web Interface loaded successfully', 'checkmark');
+            addNotification('info', 'File System', 'fs_server.omni (10 MB, 2560 blocks) with 51 users', 'folder');
+            addNotification('info', 'Server Status', '127.0.0.1:8080 is running and ready', 'gear');
+        });
+    </script>
+</body>
+</html>

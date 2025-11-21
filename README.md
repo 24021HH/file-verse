@@ -358,6 +358,23 @@ You are free to create any type of UI using any programming language or framewor
 - Must send/receive JSON messages - Follow the socket protocol
 - Must use standard error codes - Interpret OFSErrorCodes values correctly
 
+### Desktop GUI (Tkinter)
+
+If you'd like a quick graphical client for manual testing, there's a small Tkinter-based desktop client included at `ui/client_gui.py`. It connects using a TCP socket and supports both plain-text commands and a basic JSON request mode. To run it:
+
+```bash
+cd source
+make ui_run
+```
+
+Or run directly:
+
+```bash
+python3 ui/client_gui.py
+```
+
+Note: The server currently expects whitespace-delimited commands; JSON mode is available for future/more advanced backends.
+
 #### UI Portability
 Because all implementations use the same:
 - Error codes (OFSErrorCodes)
@@ -474,6 +491,76 @@ Smart students will design their Phase 1 system with Phase 2 in mind:
 - Consider how history affects your free space management
 
 You don't need to implement this now, but thinking about it will make your Phase 1 design more flexible and extensible.
+
+---
+
+## Built-in Client (Terminal)
+
+This repository includes a small interactive terminal client implemented in C++ at `source/client.cpp`. It's meant to make manual testing of the server easy and follows the server's simple text command format. The client connects to the server using TCP and opens a new connection for each command (the server currently closes the connection after responding).
+
+Quick usage:
+
+```bash
+cd source
+make            # builds ofstest, ofsserver, ofsclient
+
+# run the server in one terminal
+make server_run
+
+# run the client in another terminal (defaults to 127.0.0.1:8080)
+make client_run
+# or run directly
+./ofsclient 127.0.0.1 8080
+```
+
+Example client commands:
+- LIST /
+- CREATE /path data owner
+- READ /path
+- DELETE /path owner
+- QUIT
+
+Note: The README suggests a JSON protocol, but the included server currently uses simple whitespace-delimited commands. The client supports the same simple commands for compatibility.
+The server now supports both the original whitespace-delimited commands and the JSON request format listed in the spec. When a JSON request is received, the server responds with a structured JSON response. Example JSON request:
+
+```json
+{
+  "operation": "LIST",
+  "session_id": "",
+  "parameters": { "path": "/" },
+  "request_id": "r1"
+}
+```
+
+Example JSON response:
+
+```json
+{
+  "status": "success",
+  "operation": "LIST",
+  "request_id": "r1",
+  "data": {
+    "listing": "[FILE] file.txt (12 bytes)\n"
+  }
+}
+```
+
+Desktop GUI: There's also a Tkinter GUI client in `ui/client_gui.py` if you prefer a graphical interface instead of the terminal C++ client.
+
+To run the GUI:
+
+```bash
+cd source
+make ui_run
+```
+
+For an automated demo that sends a few commands on startup use `--demo`:
+
+```bash
+make ui_run_demo
+```
+
+
 
 **Example forward-thinking:**
 ```

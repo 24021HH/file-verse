@@ -245,5 +245,14 @@ struct FSStats {
         std::memset(reserved, 0, sizeof(reserved));
     }
 };
+#
+// -------------------------------------------------------------------------
+// Backwards-compatible integer error codes (legacy names)
+// Some files in the codebase use legacy macros like OFS_SUCCESS / OFS_ERR_*.
+// Provide integer aliases mapped to the new enum values for compatibility.
+// -------------------------------------------------------------------------
+constexpr int OFS_SUCCESS = static_cast<int>(OFSErrorCodes::SUCCESS);
+constexpr int OFS_ERR_NOTFOUND = static_cast<int>(OFSErrorCodes::ERROR_NOT_FOUND);
+constexpr int OFS_ERR_INVALID = static_cast<int>(OFSErrorCodes::ERROR_INVALID_CONFIG);
 
 #endif // ODF_TYPES_HPP
