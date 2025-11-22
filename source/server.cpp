@@ -70,12 +70,52 @@ void Server::handleClient(int clientSocket) {
     std::string request(buffer, bytesRead);
     std::cout << " Received request: " << request << "\n";
 
+    // Check if this is an HTTP request
+    bool isHTTP = (request.find("HTTP/") != std::string::npos);
+    bool isOPTIONS = (request.find("OPTIONS") == 0);
+    bool isPOST = (request.find("POST") == 0);
+
     std::string response;
-    if (handler) {
-        response = handler->processRequest(request);
+    
+    if (isHTTP && isOPTIONS) {
+        // Handle CORS preflight request
+        response = "HTTP/1.1 200 OK\r\n";
+        response += "Access-Control-Allow-Origin: *\r\n";
+        response += "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n";
+        response += "Access-Control-Allow-Headers: Content-Type\r\n";
+        response += "Content-Length: 0\r\n";
+        response += "\r\n";
+    } else if (isHTTP && isPOST) {
+        // Extract JSON body from POST request
+        size_t bodyStart = request.find("\r\n\r\n");
+        std::string jsonBody;
+        if (bodyStart != std::string::npos) {
+            jsonBody = request.substr(bodyStart + 4);
+        }
+        
+        std::string jsonResponse;
+        if (handler && !jsonBody.empty()) {
+            jsonResponse = handler->processRequest(jsonBody);
+        } else {
+            jsonResponse = "{\"status\":\"error\",\"error_message\":\"No request body\"}";
+        }
+        
+        // Send HTTP response with CORS headers
+        response = "HTTP/1.1 200 OK\r\n";
+        response += "Access-Control-Allow-Origin: *\r\n";
+        response += "Content-Type: application/json\r\n";
+        response += "Content-Length: " + std::to_string(jsonResponse.length()) + "\r\n";
+        response += "\r\n";
+        response += jsonResponse;
     } else {
-        response = "Request received: " + request;
+        // Non-HTTP request (legacy)
+        if (handler) {
+            response = handler->processRequest(request);
+        } else {
+            response = "Request received: " + request;
+        }
     }
+    
     write(clientSocket, response.c_str(), response.length());
 
     close(clientSocket);

@@ -45,13 +45,22 @@ int fs_init(OFSInstance &fs, const string &diskPath) {
     if (root->files.empty()) {
         cout << " Initializing root directory.\n";
     }
+    
+    disk.close();
+    
+    // Open disk file for read/write operations
+    fs.diskPath = diskPath;
+    fs.disk_file = fopen(diskPath.c_str(), "r+b");
+    if (!fs.disk_file) {
+        cerr << " Failed to open disk file for I/O: " << diskPath << "\n";
+        return OFS_ERR_INVALID;
+    }
 
     fs.initialized = true;
     cout << "FS initialized successfully. Version: "
               << fs.header.format_version << "\n";
     cout << "   Total blocks: " << totalBlocks << " x " << fs.header.block_size << " bytes\n";
     cout << "   Users loaded: " << fs.users.size() << "\n";
-    disk.close();
     return OFS_SUCCESS;
 }
 
@@ -73,6 +82,7 @@ int fs_format(OFSInstance &fs, uint64_t totalSize, uint64_t blockSize, const std
     fs.header.max_users = 50;
     fs.header.file_state_storage_offset = fs.header.user_table_offset + (50 * sizeof(UserInfo));
     fs.header.change_log_offset = fs.header.file_state_storage_offset + 65536;
+    fs.header.data_blocks_offset = fs.header.change_log_offset + 131072; // Data blocks start after change log
 
     disk.write(reinterpret_cast<const char*>(&fs.header), sizeof(OMNIHeader));
 
@@ -104,6 +114,12 @@ int fs_format(OFSInstance &fs, uint64_t totalSize, uint64_t blockSize, const std
 
 int fs_shutdown(OFSInstance &fs) {
     if (!fs.initialized) return OFS_ERR_INVALID;
+    
+    if (fs.disk_file) {
+        fclose(fs.disk_file);
+        fs.disk_file = nullptr;
+    }
+    
     fs.initialized = false;
     cout << "FS shutdown complete and metadata saved.\n";
     return OFS_SUCCESS;

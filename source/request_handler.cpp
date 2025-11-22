@@ -79,11 +79,19 @@ int RequestHandler::handleDelete(const vector<string>& args) {
 
 
 int RequestHandler::handleRead(const vector<string>& args) {
-    if (args.size() < 2) {
+    if (args.size() < 3) {
         return OFS_ERR_INVALID;
     }
     string path = args[1];
-    string content = FileOps::file_read(fs, path);
+    string username = args[2];
+    
+    int user_idx = -1;
+    if (!fs.userIndex.find(username, user_idx)) {
+        return OFS_ERR_INVALID;
+    }
+    
+    UserInfo& requesterUser = fs.users[user_idx];
+    string content = FileOps::file_read(fs, path, requesterUser);
     
     return content.empty() ? OFS_ERR_NOTFOUND : OFS_SUCCESS;
 }
@@ -263,19 +271,55 @@ std::string RequestHandler::processJsonRequest(const JSONRequest& req) {
         return JSONHandler::generateResponse(resp);
     } else if (req.operation == "READ") {
         std::string path = get_param("path");
-        if (path.empty()) {
+        std::string username = get_param("user");
+        if (path.empty() || username.empty()) {
             resp.status = "error";
             resp.error_code = OFS_ERR_INVALID;
-            resp.error_message = "Missing path for READ";
+            resp.error_message = "Missing parameters for READ";
             return JSONHandler::generateResponse(resp);
         }
-        std::string content = FileOps::file_read(fs, path);
+        int user_idx = -1;
+        if (!fs.userIndex.find(username, user_idx)) {
+            resp.status = "error";
+            resp.error_code = OFS_ERR_INVALID;
+            resp.error_message = "User not found";
+            return JSONHandler::generateResponse(resp);
+        }
+        UserInfo &requesterUser = fs.users[user_idx];
+        std::string content = FileOps::file_read(fs, path, requesterUser);
         if (content.empty()) {
             resp.status = "error";
             resp.error_code = OFS_ERR_NOTFOUND;
-            resp.error_message = "File not found";
+            resp.error_message = "File not found or permission denied";
         } else {
             resp.data["content"] = content;
+        }
+        return JSONHandler::generateResponse(resp);
+    } else if (req.operation == "EDIT") {
+        std::string path = get_param("path");
+        std::string new_data = get_param("data");
+        std::string username = get_param("user");
+        if (path.empty() || username.empty()) {
+            resp.status = "error";
+            resp.error_code = OFS_ERR_INVALID;
+            resp.error_message = "Missing parameters for EDIT";
+            return JSONHandler::generateResponse(resp);
+        }
+        int user_idx = -1;
+        if (!fs.userIndex.find(username, user_idx)) {
+            resp.status = "error";
+            resp.error_code = OFS_ERR_INVALID;
+            resp.error_message = "User not found";
+            return JSONHandler::generateResponse(resp);
+        }
+        UserInfo &requesterUser = fs.users[user_idx];
+        bool success = FileOps::file_edit(fs, path, new_data, requesterUser);
+        if (!success) {
+            resp.status = "error";
+            resp.error_code = OFS_ERR_INVALID;
+            resp.error_message = "File edit failed or permission denied";
+        } else {
+            resp.data["message"] = "File edited successfully";
         }
         return JSONHandler::generateResponse(resp);
     } else if (req.operation == "LIST") {

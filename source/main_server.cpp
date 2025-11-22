@@ -18,16 +18,27 @@ void signalHandler(int signum) {
 int main(int argc, char* argv[]) {
     cout << "Server Implementation \n\n";
 
-
+    // Default values
+    std::string diskPath = "ofs.omni";
     int port = 8080;
+    
+    // Parse command line arguments
     if (argc > 1) {
-        port = std::stoi(argv[1]);
+        diskPath = argv[1];
+    }
+    if (argc > 2) {
+        port = std::stoi(argv[2]);
     }
 
     OFSInstance fs;
-    std::cout << "Initializing filesystem instance...\n";
-    fs_format(fs, 10 * 1024 * 1024, 4096, "fs_server.omni");
-    fs_init(fs, "fs_server.omni");
+    std::cout << "Initializing filesystem from: " << diskPath << "\n";
+    
+    // Initialize existing filesystem (don't format)
+    int result = fs_init(fs, diskPath);
+    if (result != OFS_SUCCESS) {
+        std::cerr << "Failed to initialize filesystem. Please run FORMAT first.\n";
+        return 1;
+    }
 
     RequestHandler handler(fs);
 

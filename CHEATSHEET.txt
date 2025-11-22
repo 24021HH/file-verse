@@ -1,0 +1,175 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                    OFS FILE OPERATIONS - QUICK START                     ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+📦 SETUP (One Time)
+════════════════════════════════════════════════════════════════════════════
+cd /Users/hamnahassan/Documents/file-verse/source
+make                                    # Compile the project
+
+
+🚀 START SERVERS (Every Time)
+════════════════════════════════════════════════════════════════════════════
+
+┌─ Terminal 1: Backend Server ─────────────────────────────────────────────┐
+│ cd /Users/hamnahassan/Documents/file-verse/source                         │
+│                                                                            │
+│ # First time only - create file system:                                   │
+│ ./ofstest                                                                  │
+│ > FORMAT 10485760 4096 ofs.omni                                            │
+│ > INIT ofs.omni                                                            │
+│ > CREATE /welcome.txt "Hello OFS!" admin                                   │
+│ > SHUTDOWN                                                                 │
+│                                                                            │
+│ # Every time - start server:                                              │
+│ ./ofsserver ofs.omni                                                       │
+│                                                                            │
+│ ✅ Should see: "Server listening on port 8080"                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+┌─ Terminal 2: Web Server ─────────────────────────────────────────────────┐
+│ cd /Users/hamnahassan/Documents/file-verse/ui                             │
+│ python3 server.py                                                          │
+│                                                                            │
+│ ✅ Should see: "Serving HTTP on 0.0.0.0 port 8000"                       │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+🌐 ACCESS WEB UI
+════════════════════════════════════════════════════════════════════════════
+Browser: http://localhost:8000/filemanager.html
+
+Login:   Username: admin
+         Password: admin123
+
+
+✨ TEST FILE OPERATIONS
+════════════════════════════════════════════════════════════════════════════
+
+1️⃣  CREATE FILE
+    • Click "📄 Create File"
+    • Name: test.txt
+    • Content: "Hello World!"
+    • Click "Create File"
+    • ✅ File appears in list
+
+2️⃣  READ FILE
+    • Click "Read" button on any file
+    • ✅ Content shows in popup
+
+3️⃣  EDIT FILE
+    • Click "Edit" button on any file
+    • Modify the text
+    • Click "Save Changes"
+    • ✅ Changes saved (verify with Read)
+
+4️⃣  DELETE FILE
+    • Click "Delete" button on any file
+    • Confirm deletion
+    • ✅ File disappears from list
+
+5️⃣  REFRESH
+    • Click "🔄 Refresh Files"
+    • ✅ List updates
+
+
+🐛 TROUBLESHOOTING
+════════════════════════════════════════════════════════════════════════════
+
+Problem: "Cannot connect to server"
+Fix:     Check Terminal 1 - is ofsserver running?
+         Check port: lsof -i :8080
+
+Problem: "UI doesn't load"
+Fix:     Check Terminal 2 - is python server running?
+         Check port: lsof -i :8000
+
+Problem: "Login fails"
+Fix:     Did you run INIT ofs.omni first?
+         Credentials: admin / admin123
+
+Problem: "Files don't show"
+Fix:     Click Refresh button
+         Check Terminal 1 for errors
+
+
+📊 SUCCESS INDICATORS
+════════════════════════════════════════════════════════════════════════════
+
+Terminal 1 shows:
+  ✓ "FS initialized successfully"
+  ✓ "Server listening on port 8080"
+  ✓ "File created: /test.txt ... by admin"
+  ✓ "Read file: /test.txt ... by admin"
+
+Browser shows:
+  ✓ Beautiful purple file manager UI
+  ✓ Files listed with Read/Edit/Delete buttons
+  ✓ Green notifications on success
+  ✓ Modals open/close smoothly
+
+
+🎯 COMPLETE TEST SEQUENCE
+════════════════════════════════════════════════════════════════════════════
+
+Terminal 1:
+  ./ofstest
+  FORMAT 10485760 4096 ofs.omni
+  INIT ofs.omni
+  CREATE /test1.txt "First file" admin
+  CREATE /test2.txt "Second file" admin
+  LIST /
+  SHUTDOWN
+  ./ofsserver ofs.omni
+
+Terminal 2:
+  python3 server.py
+
+Browser:
+  1. Open http://localhost:8000/filemanager.html
+  2. Login: admin / admin123
+  3. Read test1.txt ✓
+  4. Edit test1.txt ✓
+  5. Create test3.txt ✓
+  6. Delete test3.txt ✓
+  7. Refresh ✓
+
+
+📁 KEY FILES
+════════════════════════════════════════════════════════════════════════════
+source/ofsserver          → Backend server binary
+source/ofstest            → Test client
+source/ofs.omni           → File system data (created by FORMAT)
+ui/filemanager.html       → Main UI (← OPEN THIS)
+ui/login.html             → Login page
+ui/server.py              → Web server
+
+
+🔗 USEFUL COMMANDS
+════════════════════════════════════════════════════════════════════════════
+# Check if servers are running
+ps aux | grep ofsserver
+ps aux | grep python
+
+# Kill servers
+pkill ofsserver
+pkill -f server.py
+
+# Check ports
+lsof -i :8080    # Backend
+lsof -i :8000    # Frontend
+
+# Rebuild if needed
+cd source && make
+
+
+📚 MORE INFO
+════════════════════════════════════════════════════════════════════════════
+TESTING_GUIDE.md           → Detailed testing instructions
+FILE_OPERATIONS_GUIDE.md   → Technical documentation
+QUICKSTART.md              → Quick reference guide
+
+
+═══════════════════════════════════════════════════════════════════════════
+                         YOU'RE READY TO TEST! 🚀
+═══════════════════════════════════════════════════════════════════════════

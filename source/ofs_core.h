@@ -16,8 +16,17 @@ struct OFSInstance {
     vector<UserInfo> users;
     HashMap userIndex;
     bool initialized;
+    std::string diskPath;
+    FILE* disk_file;
 
-    OFSInstance(int blocks = 1024) : freeMap(blocks), userIndex(128), initialized(false) {}
+    OFSInstance(int blocks = 1024) : freeMap(blocks), userIndex(128), initialized(false), disk_file(nullptr) {}
+    
+    ~OFSInstance() {
+        if (disk_file) {
+            fclose(disk_file);
+            disk_file = nullptr;
+        }
+    }
 };
 
 int fs_init(OFSInstance &fs, const std::string &diskPath);

@@ -91,8 +91,9 @@ struct OMNIHeader {
     // Reserved for Phase 2: Delta Vault 
     uint32_t file_state_storage_offset;  // Offset to file_state_storage area (4 bytes)
     uint32_t change_log_offset;       // Offset to change log (4 bytes)
+    uint64_t data_blocks_offset;      // Offset to data blocks region (8 bytes)
     
-    uint8_t reserved[328];      // Reserved for future use (328 bytes)
+    uint8_t reserved[320];      // Reserved for future use (320 bytes)
 
     // Default constructor
     OMNIHeader() = default;
